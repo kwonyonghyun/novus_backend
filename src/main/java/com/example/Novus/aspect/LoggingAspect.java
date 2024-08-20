@@ -19,10 +19,12 @@ public class LoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
     @Pointcut("execution(* com.example.Novus.service.*.*(..))")
-    private void serviceLayer() {}
+    private void serviceLayer() {
+    }
 
     @Pointcut("execution(* com.example.Novus.controller.*.*(..))")
-    private void controllerLayer() {}
+    private void controllerLayer() {
+    }
 
     @Around("serviceLayer()")
     public Object logAroundService(ProceedingJoinPoint joinPoint) throws Throwable {

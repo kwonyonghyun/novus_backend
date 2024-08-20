@@ -4,7 +4,7 @@ import com.example.Novus.config.jwt.TokenProvider;
 import com.example.Novus.domain.RefreshToken;
 import com.example.Novus.domain.User;
 import com.example.Novus.dto.TokenResponse;
-import com.example.Novus.exception.RefreshTokenNotFoundException;
+import com.example.Novus.exception.InvalidTokenException;
 import com.example.Novus.exception.UserNotFoundException;
 import com.example.Novus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,11 @@ public class TokenService {
     @Transactional
     public TokenResponse refreshToken(String refreshTokenString) {
         if (!tokenProvider.validateToken(refreshTokenString)) {
-            throw new RefreshTokenNotFoundException("Invalid refresh token");
+            throw new InvalidTokenException("Invalid refresh token");
         }
 
-        RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenString);
-        User user = userRepository.findById(refreshToken.getUserId())
+        Long userId = tokenProvider.getUserIdFromToken(refreshTokenString);
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         String newAccessToken = tokenProvider.generateAccessToken(user);
@@ -34,12 +34,16 @@ public class TokenService {
 
         refreshTokenService.saveRefreshToken(user.getId(), newRefreshToken);
 
-        return new TokenResponse(user.getId(),newAccessToken, newRefreshToken);
+        return new TokenResponse(user.getId(), newAccessToken, newRefreshToken);
     }
 
     @Transactional
     public void logout(String refreshToken) {
-        RefreshToken token = refreshTokenService.findByToken(refreshToken);
-        refreshTokenService.deleteByUserId(token.getUserId());
+        if (!tokenProvider.validateToken(refreshToken)) {
+            throw new InvalidTokenException("Invalid refresh token");
+        }
+
+        Long userId = tokenProvider.getUserIdFromToken(refreshToken);
+        refreshTokenService.deleteByUserId(userId);
     }
 }

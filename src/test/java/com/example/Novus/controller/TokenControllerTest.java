@@ -23,6 +23,7 @@ class TokenControllerTest {
     private static final String VALID_REFRESH_TOKEN = "valid_refresh_token";
     private static final String NEW_ACCESS_TOKEN = "new_access_token";
     private static final String NEW_REFRESH_TOKEN = "new_refresh_token";
+    private static final Long TEST_USER_ID = 1L;
 
     private MockMvc mockMvc;
 
@@ -32,7 +33,7 @@ class TokenControllerTest {
     @InjectMocks
     private TokenController tokenController;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -42,16 +43,16 @@ class TokenControllerTest {
 
     @Test
     void refreshToken_success() throws Exception {
-        TokenRefreshRequest request = new TokenRefreshRequest();
-        request.setRefreshToken(VALID_REFRESH_TOKEN);
-        TokenResponse tokenResponse = new TokenResponse(NEW_ACCESS_TOKEN, NEW_REFRESH_TOKEN);
+        TokenRefreshRequest request = new TokenRefreshRequest(VALID_REFRESH_TOKEN);
+        TokenResponse tokenResponse = new TokenResponse(TEST_USER_ID, NEW_ACCESS_TOKEN, NEW_REFRESH_TOKEN);
 
         when(tokenService.refreshToken(anyString())).thenReturn(tokenResponse);
 
-        mockMvc.perform(post("/refresh")
+        mockMvc.perform(post("/api/token/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(TEST_USER_ID))
                 .andExpect(jsonPath("$.accessToken").value(NEW_ACCESS_TOKEN))
                 .andExpect(jsonPath("$.refreshToken").value(NEW_REFRESH_TOKEN));
     }

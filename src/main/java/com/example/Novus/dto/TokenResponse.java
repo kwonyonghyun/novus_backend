@@ -1,10 +1,11 @@
 package com.example.Novus.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class TokenResponse {
     private Long userId;
     private String accessToken;

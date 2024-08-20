@@ -3,6 +3,7 @@ package com.example.Novus.config;
 import com.example.Novus.config.jwt.TokenAuthenticationFilter;
 import com.example.Novus.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,14 +29,14 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/oauth2/**", "/api/login", "/api/refresh").permitAll()
+                        .requestMatchers("/api/oauth2/**", "/api/token/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .httpBasic(httpBasic -> httpBasic.disable())
-                .cors(cors->cors.disable());
+                .cors(cors -> cors.disable());
 
         return http.build();
     }

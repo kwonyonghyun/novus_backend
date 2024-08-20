@@ -5,7 +5,6 @@ import com.example.Novus.domain.OAuthProvider;
 import com.example.Novus.domain.User;
 import com.example.Novus.dto.OAuth2LoginRequest;
 import com.example.Novus.dto.TokenResponse;
-import com.example.Novus.exception.UserNotFoundException;
 import com.example.Novus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,23 +28,17 @@ public class OAuth2Service {
 
         refreshTokenService.saveRefreshToken(user.getId(), refreshToken);
 
-        return new TokenResponse(user.getId(),accessToken, refreshToken);
+        return new TokenResponse(user.getId(), accessToken, refreshToken);
     }
 
     private User createUser(OAuth2LoginRequest request) {
-        User newUser = User.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .givenName(request.getGivenName())
-                .familyName(request.getFamilyName())
-                .profilePictureUrl(request.getProfilePictureUrl())
-                .oAuthProvider(OAuthProvider.GOOGLE)
-                .build();
+        User newUser = new User();
+        newUser.setEmail(request.getEmail());
+        newUser.setName(request.getName());
+        newUser.setGivenName(request.getGivenName());
+        newUser.setFamilyName(request.getFamilyName());
+        newUser.setProfilePictureUrl(request.getProfilePictureUrl());
+        newUser.setOAuthProvider(OAuthProvider.GOOGLE);
         return userRepository.save(newUser);
-    }
-
-    public User findUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 }

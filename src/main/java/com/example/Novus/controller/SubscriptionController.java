@@ -1,12 +1,14 @@
 package com.example.Novus.controller;
 
-import com.example.Novus.dto.UserDTO;
+import com.example.Novus.dto.SubscriptionResponse;
 import com.example.Novus.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/subscriptions")
@@ -15,20 +17,29 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserDTO>> getSubscriptions(@PathVariable Long userId) {
-        return ResponseEntity.ok(subscriptionService.getSubscriptions(userId));
-    }
-
-    @PostMapping("/{subscriberId}/subscribe/{subscribedId}")
-    public ResponseEntity<Void> subscribe(@PathVariable Long subscriberId, @PathVariable Long subscribedId) {
-        subscriptionService.subscribe(subscriberId, subscribedId);
+    @PostMapping("/{subscribedToId}")
+    public ResponseEntity<Void> subscribe(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long subscribedToId) {
+        Long subscriberId = Long.parseLong(userDetails.getUsername());
+        subscriptionService.subscribe(subscriberId, subscribedToId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{subscriberId}/unsubscribe/{subscribedId}")
-    public ResponseEntity<Void> unsubscribe(@PathVariable Long subscriberId, @PathVariable Long subscribedId) {
-        subscriptionService.unsubscribe(subscriberId, subscribedId);
+    @DeleteMapping("/{subscribedToId}")
+    public ResponseEntity<Void> unsubscribe(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long subscribedToId) {
+        Long subscriberId = Long.parseLong(userDetails.getUsername());
+        subscriptionService.unsubscribe(subscriberId, subscribedToId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<SubscriptionResponse>> getSubscriptions(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Pageable pageable) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        return ResponseEntity.ok(subscriptionService.getSubscriptions(userId, pageable));
     }
 }

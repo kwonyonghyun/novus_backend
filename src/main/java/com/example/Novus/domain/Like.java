@@ -6,17 +6,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "subscriptions")
+@Table(name = "likes")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Subscription extends BaseEntity {
+public class Like extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscriber_id", nullable = false)
-    private User subscriber;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscribed_to_id", nullable = false)
-    private User subscribedTo;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 }

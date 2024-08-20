@@ -28,6 +28,7 @@ class OAuth2ControllerTest {
     private static final String TEST_PROFILE_URL = "http://example.com/profile.jpg";
     private static final String TEST_ACCESS_TOKEN = "access_token";
     private static final String TEST_REFRESH_TOKEN = "refresh_token";
+    private static final Long TEST_USER_ID = 1L;
 
     private MockMvc mockMvc;
 
@@ -37,7 +38,7 @@ class OAuth2ControllerTest {
     @InjectMocks
     private OAuth2Controller oauth2Controller;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -49,14 +50,15 @@ class OAuth2ControllerTest {
     @DisplayName("OAuth2 로그인 성공")
     void oauth2Login_success() throws Exception {
         OAuth2LoginRequest request = new OAuth2LoginRequest(TEST_EMAIL, TEST_NAME, TEST_GIVEN_NAME, TEST_FAMILY_NAME, TEST_PROFILE_URL);
-        TokenResponse tokenResponse = new TokenResponse(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+        TokenResponse tokenResponse = new TokenResponse(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
 
         when(oauth2Service.loginOrSignUp(any(OAuth2LoginRequest.class))).thenReturn(tokenResponse);
 
-        mockMvc.perform(post("/oauth2/login")
+        mockMvc.perform(post("/api/oauth2/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(TEST_USER_ID))
                 .andExpect(jsonPath("$.accessToken").value(TEST_ACCESS_TOKEN))
                 .andExpect(jsonPath("$.refreshToken").value(TEST_REFRESH_TOKEN));
     }

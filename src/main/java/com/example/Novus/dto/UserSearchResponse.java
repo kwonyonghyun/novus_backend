@@ -9,15 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class UserSearchResponse {
     private Long id;
     private String email;
     private String name;
     private String profilePictureUrl;
-
-    public UserDTO(Long id, String name, String profilePictureUrl) {
-        this.id = id;
-        this.name = name;
-        this.profilePictureUrl = profilePictureUrl;
-    }
 }
